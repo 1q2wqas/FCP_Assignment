@@ -22,32 +22,32 @@ class Network:
 			self.nodes = nodes 
 
 	while False:
-			def get_mean_degree(self):
-				#Your code  for task 3 goes here
+		def get_mean_degree(self):
+		#Your code  for task 3 goes here
 
-				def get_mean_clustering(self):
-				#Your code for task 3 goes here
+		def get_mean_clustering(self):
+		#Your code for task 3 goes here
 
-					def get_mean_path_length(self):
-				#Your code for task 3 goes here
+		def get_mean_path_length(self):
+		#Your code for task 3 goes here
 
-						def make_random_network(self, N, connection_probability):
-							'''
-							This function makes a *random* network of size N.
-							Each node is connected to each other node with probability p
-							'''
+		def make_random_network(self, N, connection_probability):
+		'''
+		This function makes a *random* network of size N.
+		Each node is connected to each other node with probability p
+		'''
 
-				self.nodes = []
-				for node_number in range(N):
-					value = np.random.random()
-					connections = [0 for _ in range(N)]
-					self.nodes.append(Node(value, node_number, connections))
-
-				for (index, node) in enumerate(self.nodes):
-					for neighbour_index in range(index+1, N):
-						if np.random.random() < connection_probability:
-							node.connections[neighbour_index] = 1
-							self.nodes[neighbour_index].connections[index] = 1
+			self.nodes = []
+			for node_number in range(N):
+				value = np.random.random()
+				connections = [0 for _ in range(N)]
+				self.nodes.append(Node(value, node_number, connections))
+	
+			for (index, node) in enumerate(self.nodes):
+				for neighbour_index in range(index+1, N):
+					if np.random.random() < connection_probability:
+						node.connections[neighbour_index] = 1
+						self.nodes[neighbour_index].connections[index] = 1
 
 	def make_ring_network(self, N, neighbour_range=2):
 		"""
