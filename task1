@@ -1,0 +1,114 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import argparse
+
+
+def calculate_agreement(population, row, col, external=0.0):
+    """Calculate agreement of a given cell with its direct neighbors."""
+    n_rows, n_cols = population.shape
+    # Define neighbor indices using periodic boundary conditions
+    neighbor_indices = [
+        ((row - 1) % n_rows, col),   # top
+        ((row + 1) % n_rows, col),   # bottom
+        (row, (col - 1) % n_cols),   # left
+        (row, (col + 1) % n_cols)    # right
+    ]
+    # Gather neighbor values
+    neighbors = [population[i] for i in neighbor_indices]
+    # Calculate agreement score including external influence
+    agreement = sum(neighbors) * population[row, col] + external * population[row, col]
+    return agreement
+
+
+def ising_step(population, beta, external=0.0):
+    """Perform a single update step in the Ising model."""
+    n_rows, n_cols = population.shape
+    # Perform updates for each cell in the grid
+    for _ in range(n_rows * n_cols):
+        row = np.random.randint(0, n_rows)
+        col = np.random.randint(0, n_cols)
+        # Calculate energy change if cell state is flipped
+        delta_e = calculate_agreement(population, row, col, external)
+        # Flip the cell with a probability dependent on delta_e and beta
+        if delta_e < 0 or np.random.rand() < np.exp(-delta_e * beta):
+            population[row, col] *= -1
+
+
+def plot_ising(population):
+    """Display the Ising model using Matplotlib."""
+    plt.imshow(population, interpolation='none', cmap='RdPu_r')
+    plt.axis('off')
+    plt.draw()
+
+
+def simulate_ising(model, steps=1000, frames=100, pause_time=0.01):
+    """Run the Ising model simulation."""
+    plt.ion()  # Turn on interactive mode for live updates
+    for frame in range(frames):
+        # Update the model state multiple times before redrawing
+        for step in range(steps):
+            ising_step(model['population'], model['beta'], model['external'])
+        plot_ising(model['population'])
+        plt.pause(pause_time)  # Pause to update the display
+    plt.ioff()    # Turn off interactive mode
+    plt.show()
+
+
+def test_ising():
+    """
+    Test suite to validate the calculations within the Ising model.
+    """
+    print("Testing ising model calculations")
+    population = -np.ones((3, 3))
+    assert(calculate_agreement(population,1,1)==4), "Test 1"
+
+    population[1, 1] = 1.
+    assert(calculate_agreement(population,1,1)==-4), "Test 2"
+
+    population[0, 1] = 1.
+    assert(calculate_agreement(population,1,1)==-2), "Test 3"
+
+    population[1, 0] = 1.
+    assert(calculate_agreement(population,1,1)==0), "Test 4"
+
+    population[2, 1] = 1.
+    assert(calculate_agreement(population,1,1)==2), "Test 5"
+
+    population[1, 2] = 1.
+    assert(calculate_agreement(population,1,1)==4), "Test 6"
+
+    "Testing external pull"
+    population = -np.ones((3, 3))
+    assert(calculate_agreement(population,1,1,1)==3), "Test 7"
+    assert(calculate_agreement(population,1,1,-1)==5), "Test 8"
+    assert(calculate_agreement(population,1,1,-10)== 14), "Test 9"
+    assert(calculate_agreement(population,1,1,10)== -6), "Test 10"
+
+    print("Tests passed")
+
+
+def main():
+    """
+    Main function to handle command-line arguments and launch the simulation or testing.
+    """
+    parser = argparse.ArgumentParser(description="Run the Ising model simulation.")
+    parser.add_argument("-ising_model", action="store_true", help="Run the Ising model with default parameters")
+    parser.add_argument("-external", type=float, default=0.0, help="External influence factor")
+    parser.add_argument("-alpha", type=float, default=1.0, help="Alpha value for societal tolerance")
+    parser.add_argument("-test_ising", action="store_true", help="Run the test functions for the model")
+    args = parser.parse_args()
+
+    if args.test_ising:
+        test_ising()  # Run tests for the Ising model calculations
+    elif args.ising_model:
+        population = np.random.choice([-1, 1], size=(10, 10))
+        model = {
+            'population': population,
+            'beta': 1 / args.alpha,
+            'external': args.external
+        }
+        simulate_ising(model)  # Start the Ising model simulation
+
+
+if __name__ == "__main__":
+    main()
