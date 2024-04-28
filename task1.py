@@ -362,8 +362,8 @@ def test_ising():
     population = -np.ones((3, 3))
     assert (calculate_agreement(population, 1, 1, 1) == 3), "Test 7"
     assert (calculate_agreement(population, 1, 1, -1) == 5), "Test 8"
-    assert (calculate_agreement(population, 1, 1, 10) == 14), "Test 9"
-    assert (calculate_agreement(population, 1, 1, -10) == -6), "Test 10"
+    assert (calculate_agreement(population, 1, 1, -10) == 14), "Test 9"
+    assert (calculate_agreement(population, 1, 1, 10) == -6), "Test 10"
 
     print("Tests passed")
 
@@ -384,7 +384,7 @@ def ising_main():
     if args.test_ising:
         test_ising()  # Run tests for the Ising model calculations
     elif args.ising_model:
-        population = np.random.choice([-1, 1], size=(10, 10))
+        population = np.random.choice([-1, 1], size=(30, 30))
         model = {
             'population': population,
             'beta': 1 / args.alpha,
@@ -466,50 +466,20 @@ This section contains code for the main function- you should write some code for
 '''
 
 
-# def main():
-#     """
-#     Parse command line arguments and create/plot a ring network or a small-world network based on the provided arguments.
-#     """
-#
-#     # Create argument parser
-#     parser = argparse.ArgumentParser(
-#         description='Create and plot a ring network of size N or a small-world network of size N -with a rewiring probability.')
-#
-#     # Define command line arguments
-#     parser.add_argument('-ring_network', type=int, help='Specify the size of the ring network')
-#     parser.add_argument('-small_world', type=int, help='Specify the size of the small-world network')
-#     parser.add_argument('-re_wire', type=float, default=0.2, help='Specify the rewiring probability (default is 0.2)')
-#
-#     # Parse the arguments
-#     args = parser.parse_args()
-#
-#     # Create a network instance
-#     network = Network()
-#
-#     # Check which type of network to create based on the provided arguments
-#     if args.ring_network:
-#         # Create and plot a ring network
-#         N = args.ring_network
-#         network.make_ring_network(N)
-#         network.plot(network_type="Ring")
-#
-#     elif args.small_world:
-#         # Create and plot a small-world network
-#         N = args.small_world
-#         re_wire_prob = args.re_wire
-#         network.make_small_world_network(N, re_wire_prob)
-#         network.plot(network_type="Small-World", re_wire_prob=re_wire_prob)
-#
-#     else:
-#         # Prompt user to specify the size of the network using appropriate flags
-#         print('Please specify the size of the network using the -ring_network or -small_world flag.')
+
 def main():
     parser = argparse.ArgumentParser(description="网络Ising模拟。")
     parser.add_argument("-ising_model", action="store_true", help="运行Ising模型")
     parser.add_argument("-use_network", type=int, help="使用指定节点数的网络", nargs='?', const=10, default=None)
-    parser.add_argument("-alpha", type=float, default=1.0, help="Ising模型的逆温度参数")
-
+    parser.add_argument("-alpha", type=float, default=1.0, help="Ising")
+    parser.add_argument("-external", type=float, default=0.0, help="External influence factor")
+    parser.add_argument("-test_ising", action="store_true", help="Run the test functions for the model")
+    parser.add_argument('-ring_network', type=int, help='Specify the size of the ring network')
+    parser.add_argument('-small_world', type=int, help='Specify the size of the small-world network')
+    parser.add_argument('-re_wire', type=float, default=0.2, help='Specify the rewiring probability (default is 0.2)')
     args = parser.parse_args()
+
+    network = Network()
 
     if args.ising_model:
         if args.use_network is not None:
@@ -517,12 +487,32 @@ def main():
             # 默认使用小世界网络，除非另有指定
             network.make_small_world_network(args.use_network, 0.2)
             simulate_ising_network(network, 1/args.alpha, 1000, 200)
+
         else:
-            # 回退到基于网格或数组的模拟
-            population = np.random.choice([-1, 1], size=(10, 10))
-            model = {'population': population, 'beta': 1/args.alpha}
+            # if args.external is not None:
+            population = np.random.choice([-1, 1], size=(30, 30))
+            model = {
+                'population': population,
+                'beta': 1 / args.alpha,
+                'external': args.external
+            }
             simulate_ising(model)
+    elif args.test_ising:
+        print('Run tests for the Ising model calculations')
+        test_ising()  # Run tests for the Ising model calculations
+
+    elif args.ring_network:
+        # Create and plot a ring network
+        N = args.ring_network
+        network.make_ring_network(N)
+        network.plot(network_type="Ring")
+
+    elif args.small_world:
+        # Create and plot a small-world network
+        N = args.small_world
+        re_wire_prob = args.re_wire
+        network.make_small_world_network(N, re_wire_prob)
+        network.plot(network_type="Small-World", re_wire_prob=re_wire_prob)
 
 if __name__ == "__main__":
     main()
-
