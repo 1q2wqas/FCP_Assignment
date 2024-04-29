@@ -375,6 +375,8 @@ def ising_main():
     parser.add_argument("-external", type=float, default=0.0, help="External influence factor")
     parser.add_argument("-alpha", type=float, default=1.0, help="Alpha value for societal tolerance")
     parser.add_argument("-test_ising", action="store_true", help="Run the test functions for the model")
+    parser.add_argument('-network', metavar='N', type=int, help='Random network to create and plot')
+    parser.add_argument('-test_network', action='store_true', help='Run network tests')
     args = parser.parse_args()
 
     if args.alpha == 0:
@@ -477,6 +479,9 @@ def main():
     parser.add_argument('-ring_network', type=int, help='Specify the size of the ring network')
     parser.add_argument('-small_world', type=int, help='Specify the size of the small-world network')
     parser.add_argument('-re_wire', type=float, default=0.2, help='Specify the rewiring probability (default is 0.2)')
+    parser.add_argument('-network', type=int, help='Specify the size of the random network')
+    parser.add_argument('-test_network', action='store_true', help='Run the test functions that have provided')
+
     args = parser.parse_args()
 
     network = Network()
@@ -513,6 +518,22 @@ def main():
         re_wire_prob = args.re_wire
         network.make_small_world_network(N, re_wire_prob)
         network.plot(network_type="Small-World", re_wire_prob=re_wire_prob)
+
+    elif args.network:
+        # Create and plot a random network
+        N=args.network
+        network.make_random_network(N)
+        print("Mean degree:",network.get_mean_degree())
+        print("Average path length:",network.get_path_length())
+        print("Clustering co-efficient:",network.get_clustering())
+        network.plot(network_type="random")
+
+    elif args.test_network:
+        # test some different networks
+        test_networks()
+
+    else:
+        print('please')
 
 if __name__ == "__main__":
     main()
